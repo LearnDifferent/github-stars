@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: github-stars
+server:
+  port: 8080
+access-token:
