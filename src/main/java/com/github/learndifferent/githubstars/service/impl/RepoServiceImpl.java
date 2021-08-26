@@ -27,40 +27,50 @@ public class RepoServiceImpl implements RepoService {
     }
 
     @Override
-    public List<Repo> getStarredRepoByUsername(String username) {
+    public List<Repo> getStarredRepos(String username, boolean getAllLanguages) {
 
-        List<Repo> starredRepo = new ArrayList<>();
+        List<Repo> repos = new ArrayList<>();
         int pageNum = 1;
 
         while (true) {
+            log.info("Processing page " + pageNum);
             String json = restTemplate.getForObject(ApiConstant.INCOMPLETE_API_URL,
                     String.class, username, pageNum);
-            log.info("Processing page " + pageNum);
 
-            List<Repo> temp = JsonUtil.toObject(json, new TypeReference<List<Repo>>() {
+            List<Repo> reposTemp = JsonUtil.toObject(json, new TypeReference<List<Repo>>() {
             });
 
-            if (CollectionUtils.isEmpty(temp)) {
+            if (CollectionUtils.isEmpty(reposTemp)) {
                 log.info("Finish getting " + username + "'s starred repos.");
                 break;
             }
 
             // todo 使用 AOP，完成获取 languages 的过程
-            temp.forEach(o -> {
-                if (StringUtils.isEmpty(o.getLanguage())) {
-                    // if no language provided, just return
-                    log.info("Get Starred Repo: " + o.getName());
-                    return;
-                }
-                o.setLanguages(getLanguages(o));
-            });
+            if (getAllLanguages) {
+                // 如果为 true，就遍历获取所有 languages
+                reposTemp.forEach(o -> {
+                    if (StringUtils.isEmpty(o.getLanguage())) {
+                        // if no language provided, just return
+                        return;
+                    }
+                    o.setLanguages(getLanguages(o));
+                    log.info("Get Starred Repo's all languages: " + o.getName());
+                });
+            }
 
-            starredRepo.addAll(temp);
+            // 添加当前页面的 repo list
+            repos.addAll(reposTemp);
             log.info("Finished page " + pageNum);
             pageNum++;
         }
 
-        return starredRepo;
+        return repos;
+    }
+
+
+    @Override
+    public List<Repo> getStarredRepos(String username) {
+        return getStarredRepos(username, false);
     }
 
     @Override
@@ -70,14 +80,16 @@ public class RepoServiceImpl implements RepoService {
         try {
             json = restTemplate.getForObject(url, String.class);
         } catch (RestClientException e) {
-            log.warn("Fail to access: " + repo.getName());
+            log.warn("Fail to access Repo's all languages: " + repo.getName());
             e.printStackTrace();
             return Collections.emptyList();
         }
 
+        // 获取到的 key 是编程语言，value 是有该编程语言的构成数据
+        // 所以 value 可以忽略，不过要使用 LinkedHashMap 来保证是按照默认（从多到少）顺序排列
         Map<String, String> languagesMap = JsonUtil.toObject(json,
-                new TypeReference<LinkedHashMap<String, String>>() {});
-        log.info("Get Starred Repo: " + repo.getName());
+                new TypeReference<LinkedHashMap<String, String>>() {
+                });
 
         return new ArrayList<>(languagesMap.keySet());
     }

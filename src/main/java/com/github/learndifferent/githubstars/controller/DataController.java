@@ -31,7 +31,7 @@ public class DataController {
 
     @GetMapping("/{username}")
     public void getStarsListMarkdown(@PathVariable("username") String username) {
-        List<Repo> starredRepoSortByTime = repoService.getStarredRepoByUsername(username);
+        List<Repo> starredRepoSortByTime = repoService.getStarredRepos(username);
         List<Repo> stars = repoService.getSortedRepo(starredRepoSortByTime);
         // 生成文件
         markdownService.generateMarkdown(stars);
