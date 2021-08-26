@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.learndifferent.githubstars.entity.Repo;
+import com.github.learndifferent.githubstars.service.RepoService;
 import com.github.learndifferent.githubstars.util.JsonUtil;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
@@ -436,6 +438,25 @@ class GithubStarsApplicationTests {
             v.forEach(System.out::println);
             System.out.println("--------------");
         });
+    }
+
+    @Autowired
+    private RepoService repoService;
+
+    @Test
+    void getSortedMap() {
+        List<Repo> repos = repoService.getRecentStarredRepos("itwanger");
+        LinkedHashMap<String, List<Repo>> map = repoService.getSortedRepoMap(repos);
+        for (String key : map.keySet()) {
+            System.out.println(key);
+            List<Repo> repoList = map.get(key);
+            repoList.forEach(repo -> {
+                System.out.println(repo.getName());
+                System.out.println(repo.getWatchers());
+                System.out.println(repo.getForks());
+            });
+            System.out.println("--------------");
+        }
     }
 
 }

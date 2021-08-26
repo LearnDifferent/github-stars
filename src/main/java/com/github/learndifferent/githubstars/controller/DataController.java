@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 
@@ -31,8 +32,8 @@ public class DataController {
 
     @GetMapping("/{username}")
     public void getStarsListMarkdown(@PathVariable("username") String username) {
-        List<Repo> starredRepoSortByTime = repoService.getStarredRepos(username);
-        List<Repo> stars = repoService.getSortedRepo(starredRepoSortByTime);
+        List<Repo> recentRepos = repoService.getRecentStarredRepos(username);
+        LinkedHashMap<String, List<Repo>> stars = repoService.getSortedRepoMap(recentRepos);
         // 生成文件
         markdownService.generateMarkdown(stars);
     }

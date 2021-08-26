@@ -3,6 +3,7 @@ package com.github.learndifferent.githubstars.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.learndifferent.githubstars.Const.ApiConstant;
 import com.github.learndifferent.githubstars.entity.Repo;
+import com.github.learndifferent.githubstars.exception.ServiceException;
 import com.github.learndifferent.githubstars.service.RepoService;
 import com.github.learndifferent.githubstars.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,7 +29,7 @@ public class RepoServiceImpl implements RepoService {
     }
 
     @Override
-    public List<Repo> getStarredRepos(String username, boolean getAllLanguages) {
+    public List<Repo> getRecentStarredRepos(String username, boolean getAllLanguages) {
 
         List<Repo> repos = new ArrayList<>();
         int pageNum = 1;
@@ -69,8 +71,8 @@ public class RepoServiceImpl implements RepoService {
 
 
     @Override
-    public List<Repo> getStarredRepos(String username) {
-        return getStarredRepos(username, false);
+    public List<Repo> getRecentStarredRepos(String username) {
+        return getRecentStarredRepos(username, false);
     }
 
     @Override
@@ -94,17 +96,54 @@ public class RepoServiceImpl implements RepoService {
         return new ArrayList<>(languagesMap.keySet());
     }
 
+    /**
+     * 给 Repo List 进行排序，最后输出排序后的 Repo Map。
+     * <p>1. 将列表按照先 Watchers，后 Forks 排序，然后替换所有为 null 的 language 属性为 "Others"</p>
+     * <p>2. 生成一个按照 Language 分类，也就是 Language 作为 key 的 LinkedHashMap</p>
+     * <p>3. 用刚刚生成的 Map 的 entrySet 的 Stream，来给这个 Map 的 key 再次进行排序</p>
+     * <p>3.1 再次排序的时候，首先将 key 为 "Others" 的排序值，设置为 -1</p>
+     * <p>3.2 然后，按照 key 所包含的 value 的多少，来设置排序值；key 包含的 value 越多，值越大</p>
+     * <p>3.3 最后，按照排序值从大到小，进行排序</p>
+     * <p>3.4 也就是说，含有 Repo 最多的 Language 会排在前面；
+     * Language 为 null，也就是 "Others" 会排在最后</p>
+     * <p>4. 最后生成完成的 LinkedHashMap 并返回</p>
+     *
+     * @param repos starred repositories
+     * @return 排序后的 Repos
+     */
     @Override
-    public List<Repo> getSortedRepo(List<Repo> starredRepo) {
+    public LinkedHashMap<String, List<Repo>> getSortedRepoMap(List<Repo> repos) {
 
-        log.info("Sorting Starred Repo by Language, Stars and Forks...");
-        Comparator<Repo> comparator = Comparator
-                .comparing(Repo::getLanguage, Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(Repo::getWatchers, Comparator.reverseOrder())
-                .thenComparing(Repo::getForks, Comparator.reverseOrder());
-
-        starredRepo.sort(comparator);
-        log.info("Finish sorting.");
-        return starredRepo;
+        log.info("Sort Starred Repo by Language, Stars and Forks.");
+        return repos.stream()
+                .sorted(Comparator
+                        .comparing(Repo::getWatchers, Comparator.reverseOrder())
+                        .thenComparing(Repo::getForks, Comparator.reverseOrder()))
+                .peek(repo -> {
+                    // 这里将 null 值转换为 Others 字符串
+                    if (repo.getLanguage() == null) {
+                        repo.setLanguage("Others");
+                    }
+                })
+                .collect(Collectors.groupingBy(
+                        Repo::getLanguage,
+                        LinkedHashMap::new,
+                        Collectors.toList()))
+                .entrySet().stream()
+                .sorted(Comparator.comparing(entry -> {
+                            if (entry.getKey().equalsIgnoreCase("others")) {
+                                return -1;
+                            }
+                            return entry.getValue().size();
+                        }, Comparator.reverseOrder())
+                )
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> {
+                            throw new ServiceException("Key Conflicts");
+                        },
+                        LinkedHashMap::new));
     }
+
 }

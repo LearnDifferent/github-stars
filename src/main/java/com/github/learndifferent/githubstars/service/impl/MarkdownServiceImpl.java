@@ -11,59 +11,67 @@ import org.springframework.util.StringUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 public class MarkdownServiceImpl implements MarkdownService {
 
     @Override
-    public void generateMarkdown(List<Repo> starredRepo) {
+    public void generateMarkdown(LinkedHashMap<String, List<Repo>> repoMap) {
 
-        try (FileOutputStream fos = new FileOutputStream(getFile());
-             OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-             PrintWriter pw = new PrintWriter(osw, true)) {
-            // 总数
-            final int total = starredRepo.size();
-            // 计数器
-            final int[] count = {1};
-            // Repo 拥有的语言列表
-            List<String> existingLanguage = new ArrayList<>();
-
-            starredRepo.forEach(s -> {
-                String primaryLanguage =
-                        s.getLanguage() != null ? s.getLanguage() : "Others";
-
-                if (languageNotExist(existingLanguage, primaryLanguage)) {
-                    existingLanguage.add(primaryLanguage);
-                    pw.println("# <span id=\"" + getMarkdownId(primaryLanguage) + "\">"
-                            + primaryLanguage + "</span>");
-                    pw.println();
-                    log.info("Add H1 Tag: " + primaryLanguage);
-                }
-
-                log.info("Adding " + s.getName() + " to file.");
-                pw.println("[" + s.getName() + "](" + s.getHtmlUrl() + ") :");
-                pw.println();
-                printIfExist(s.getHomepage(), "- [Homepage](" + s.getHomepage() + ")", pw);
-                pw.println("- Owner: [" + s.getOwner().getLogin() + "](" + s.getOwner().getHtmlUrl() + ")");
-                printIfExist(s.getDescription(), "- Description: " + s.getDescription(), pw);
-                pw.println("- Clone: `git clone " + s.getSshUrl() + "`");
-                pw.println("- Stars: " + s.getWatchers() + ", Forks: " + s.getForks());
-                printLanguagesIfExist(pw, s.getLanguages());
-                pw.println();
-                pw.println();
-                log.info(count[0] + "done, " + (total - count[0]) + " to go.");
-                count[0]++;
-            });
-        } catch (FileNotFoundException e) {
-            log.warn("Can't find the file.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            log.info("Finish Generating Markdown File.");
-        }
+        log.warn("暂时关闭生成 Markdown 的功能");
+//        try (FileOutputStream fos = new FileOutputStream(getFile());
+//             OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+//             PrintWriter pw = new PrintWriter(osw, true)) {
+//
+//            repoMap.size()
+//
+//
+//
+//            // 总数
+//            final int total = starredRepo.size();
+//            // 计数器
+//            final int[] count = {1};
+//            // Repo 拥有的语言列表
+//            List<String> existingLanguage = new ArrayList<>();
+//
+//            starredRepo.forEach(s -> {
+//                String primaryLanguage =
+//                        s.getLanguage() != null ? s.getLanguage() : "Others";
+//
+//                if (languageNotExist(existingLanguage, primaryLanguage)) {
+//                    existingLanguage.add(primaryLanguage);
+//                    pw.println("# <span id=\"" + getMarkdownId(primaryLanguage) + "\">"
+//                            + primaryLanguage + "</span>");
+//                    pw.println();
+//                    log.info("Add H1 Tag: " + primaryLanguage);
+//                }
+//
+//                log.info("Adding " + s.getName() + " to file.");
+//                pw.println("[" + s.getName() + "](" + s.getHtmlUrl() + ") :");
+//                pw.println();
+//                printIfExist(s.getHomepage(), "- [Homepage](" + s.getHomepage() + ")", pw);
+//                pw.println("- Owner: [" + s.getOwner().getLogin() + "](" + s.getOwner().getHtmlUrl() + ")");
+//                printIfExist(s.getDescription(), "- Description: " + s.getDescription(), pw);
+//                pw.println("- Clone: `git clone " + s.getSshUrl() + "`");
+//                pw.println("- Stars: " + s.getWatchers() + ", Forks: " + s.getForks());
+//                printLanguagesIfExist(pw, s.getLanguages());
+//                pw.println();
+//                pw.println();
+//                log.info(count[0] + "done, " + (total - count[0]) + " to go.");
+//                count[0]++;
+//            });
+//        } catch (FileNotFoundException e) {
+//            log.warn("Can't find the file.");
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            log.info("Finish Generating Markdown File.");
+//        }
     }
 
     private File getFile() {
