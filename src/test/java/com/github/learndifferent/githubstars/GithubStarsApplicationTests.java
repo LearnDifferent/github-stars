@@ -8,9 +8,8 @@ import com.github.learndifferent.githubstars.util.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SpringBootTest
@@ -426,11 +425,12 @@ class GithubStarsApplicationTests {
     void sortMap() {
         List<Repo> repos = JsonUtil.toObject(json, new TypeReference<List<Repo>>() {
         });
-        Map<String, List<Repo>> map = repos.stream()
+        LinkedHashMap<String, List<Repo>> map = repos.stream()
                 .sorted(Comparator
                         .comparing(Repo::getWatchers, Comparator.reverseOrder())
                         .thenComparing(Repo::getForks, Comparator.reverseOrder()))
-                .collect(Collectors.groupingBy(Repo::getLanguage));
+                .collect(Collectors.groupingBy(Repo::getLanguage, LinkedHashMap::new, Collectors.toList()));
+
         map.forEach((k,v)->{
             System.out.println(k);
             v.forEach(System.out::println);
