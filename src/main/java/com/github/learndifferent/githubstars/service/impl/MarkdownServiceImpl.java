@@ -1,6 +1,6 @@
 package com.github.learndifferent.githubstars.service.impl;
 
-import com.github.learndifferent.githubstars.entity.Starred;
+import com.github.learndifferent.githubstars.entity.Repo;
 import com.github.learndifferent.githubstars.exception.ServiceException;
 import com.github.learndifferent.githubstars.service.MarkdownService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,19 +18,19 @@ import java.util.List;
 public class MarkdownServiceImpl implements MarkdownService {
 
     @Override
-    public void generateMarkdown(List<Starred> stars) {
+    public void generateMarkdown(List<Repo> starredRepo) {
 
         try (FileOutputStream fos = new FileOutputStream(getFile());
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              PrintWriter pw = new PrintWriter(osw, true)) {
             // 总数
-            final int total = stars.size();
+            final int total = starredRepo.size();
             // 计数器
             final int[] count = {1};
             // Repo 拥有的语言列表
             List<String> existingLanguage = new ArrayList<>();
 
-            stars.forEach(s -> {
+            starredRepo.forEach(s -> {
                 String primaryLanguage =
                         s.getLanguage() != null ? s.getLanguage() : "Others";
 

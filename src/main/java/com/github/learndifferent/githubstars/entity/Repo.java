@@ -8,11 +8,14 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Starred Repository
+ */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 @Data
-public class Starred {
+public class Repo {
 
     // name
     private String name;

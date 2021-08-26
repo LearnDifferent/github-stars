@@ -2,8 +2,8 @@ package com.github.learndifferent.githubstars.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.learndifferent.githubstars.Const.ApiConstant;
-import com.github.learndifferent.githubstars.entity.Starred;
-import com.github.learndifferent.githubstars.service.StarredService;
+import com.github.learndifferent.githubstars.entity.Repo;
+import com.github.learndifferent.githubstars.service.RepoService;
 import com.github.learndifferent.githubstars.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +17,19 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class StarredServiceImpl implements StarredService {
+public class RepoServiceImpl implements RepoService {
 
     private final RestTemplate restTemplate;
 
     @Autowired
-    public StarredServiceImpl(RestTemplate restTemplate) {
+    public RepoServiceImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     @Override
-    public List<Starred> getStarsByUsername(String username) {
+    public List<Repo> getStarredRepoByUsername(String username) {
 
-        List<Starred> stars = new ArrayList<>();
+        List<Repo> starredRepo = new ArrayList<>();
         int pageNum = 1;
 
         while (true) {
@@ -37,7 +37,7 @@ public class StarredServiceImpl implements StarredService {
                     String.class, username, pageNum);
             log.info("Processing page " + pageNum);
 
-            List<Starred> temp = JsonUtil.toObject(json, new TypeReference<List<Starred>>() {
+            List<Repo> temp = JsonUtil.toObject(json, new TypeReference<List<Repo>>() {
             });
 
             if (CollectionUtils.isEmpty(temp)) {
@@ -55,44 +55,44 @@ public class StarredServiceImpl implements StarredService {
                 o.setLanguages(getLanguages(o));
             });
 
-            stars.addAll(temp);
+            starredRepo.addAll(temp);
             log.info("Finished page " + pageNum);
             pageNum++;
         }
 
-        return stars;
+        return starredRepo;
     }
 
     @Override
-    public List<String> getLanguages(Starred starred) {
-        String url = starred.getLanguagesUrl();
+    public List<String> getLanguages(Repo repo) {
+        String url = repo.getLanguagesUrl();
         String json = "";
         try {
             json = restTemplate.getForObject(url, String.class);
         } catch (RestClientException e) {
-            log.warn("Fail to access: " + starred.getName());
+            log.warn("Fail to access: " + repo.getName());
             e.printStackTrace();
             return Collections.emptyList();
         }
 
-        Map<String, String> languagesMap = JsonUtil.toObject(json, new TypeReference<LinkedHashMap<String, String>>() {
-        });
-        log.info("Get Starred Repo: " + starred.getName());
+        Map<String, String> languagesMap = JsonUtil.toObject(json,
+                new TypeReference<LinkedHashMap<String, String>>() {});
+        log.info("Get Starred Repo: " + repo.getName());
 
         return new ArrayList<>(languagesMap.keySet());
     }
 
     @Override
-    public List<Starred> getSortedStars(List<Starred> stars) {
+    public List<Repo> getSortedRepo(List<Repo> starredRepo) {
 
         log.info("Sorting Starred Repo by Language, Stars and Forks...");
-        Comparator<Starred> comparator = Comparator
-                .comparing(Starred::getLanguage, Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(Starred::getWatchers, Comparator.reverseOrder())
-                .thenComparing(Starred::getForks, Comparator.reverseOrder());
+        Comparator<Repo> comparator = Comparator
+                .comparing(Repo::getLanguage, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(Repo::getWatchers, Comparator.reverseOrder())
+                .thenComparing(Repo::getForks, Comparator.reverseOrder());
 
-        stars.sort(comparator);
+        starredRepo.sort(comparator);
         log.info("Finish sorting.");
-        return stars;
+        return starredRepo;
     }
 }
