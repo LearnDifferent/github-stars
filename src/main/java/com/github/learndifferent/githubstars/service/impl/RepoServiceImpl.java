@@ -47,7 +47,6 @@ public class RepoServiceImpl implements RepoService {
                 break;
             }
 
-            // todo 使用 AOP，完成获取 languages 的过程
             if (getAllLanguages) {
                 // 如果为 true，就遍历获取所有 languages
                 reposTemp.forEach(o -> {
