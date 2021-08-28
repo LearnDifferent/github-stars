@@ -12,9 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -49,7 +47,8 @@ public class MarkdownServiceImpl implements MarkdownService {
             // 创建一个 Map，key 为仓库的主要编程语言，value 为该编程语言的 id（用于 Markdown）
             LinkedHashMap<String, String> languageAndTheirMarkdownId = reposMainLanguage
                     .stream()
-                    .collect(Collectors.toMap(Function.identity(),
+                    .collect(Collectors.toMap(
+                            Function.identity(),
                             this::getMarkdownId,
                             (a, b) -> a,
                             LinkedHashMap::new));
@@ -110,8 +109,7 @@ public class MarkdownServiceImpl implements MarkdownService {
     }
 
     private String getMarkdownId(String word) {
-        // 将所有非数字和非字母的字符，替换为 - 符号
-        return word.trim().toLowerCase().replaceAll("\\W", "-");
+        return UUID.randomUUID().toString();
     }
 
     private void printIfExist(String item, String printLine, PrintWriter pw) {
