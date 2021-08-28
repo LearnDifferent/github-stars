@@ -26,4 +26,10 @@ public class DataController {
     public void getStarsListMarkdown(@PathVariable("username") String username) {
         markdownService.generateMarkdown(username);
     }
+
+    @GetMapping("/{username}/{getAllLanguages}")
+    public void getStarsListMarkdown(@PathVariable("username") String username,
+                                     @PathVariable(value = "getAllLanguages") boolean getAllLanguages) {
+        markdownService.generateMarkdown(username, getAllLanguages);
+    }
 }
