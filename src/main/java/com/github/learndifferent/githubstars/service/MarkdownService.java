@@ -6,5 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public interface MarkdownService {
-    void generateMarkdown(LinkedHashMap<String, List<Repo>> repoMap);
+    void generateMarkdown(String username, LinkedHashMap<String, List<Repo>> repoMap);
+
+    void generateMarkdown(String username, boolean getAllLanguages);
+
+    void generateMarkdown(String username);
 }
