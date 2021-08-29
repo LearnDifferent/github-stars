@@ -62,13 +62,13 @@ Build a JAR file and run it from the command line:
 
 ```bash
 # Build a JAR file
-./mvnw package
+$ ./mvnw package
 
 # Move the JAR file to current directory
-mv target/*.jar .
+$ mv target/*.jar .
 
 # Run the JAR file
-java -jar target/*.jar
+$ java -jar target/*.jar
 ```
 
 Or you can run the application from Maven directly using the Spring Boot Maven plugin:
