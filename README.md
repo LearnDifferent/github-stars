@@ -8,6 +8,7 @@ Generate a list of GitHub user's stars and save it to a Markdown file.
 * [Configuration](#configuration)
 * [Building and Running](#building-and-running)
 * [Usage](#usage)
+* [Defining Custom Sorting Order](#defining-custom-sorting-order)
 * [My GitHub Stars](#my-github-stars)
 * [License](#license)
 
