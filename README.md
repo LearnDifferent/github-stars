@@ -17,10 +17,10 @@ Clone the repository into a local directory:
 
 ```bash
 # Clone the repository
-$ git clone git@github.com:LearnDifferent/github-stars.git
+git clone git@github.com:LearnDifferent/github-stars.git
 
 # Go into the repository
-$ cd github-stars
+cd github-stars
 ```
 
 Or you can [click here](https://github.com/LearnDifferent/github-stars/archive/refs/heads/master.zip) to download the zip file containing the code.
@@ -62,19 +62,19 @@ Build a JAR file and run it from the command line:
 
 ```bash
 # Build a JAR file
-$ ./mvnw package
+./mvnw package
 
 # Move the JAR file to current directory
-$ mv target/*.jar .
+mv target/*.jar .
 
 # Run the JAR file
-$ java -jar target/*.jar
+java -jar target/*.jar
 ```
 
 Or you can run the application from Maven directly using the Spring Boot Maven plugin:
 
 ```bash
-$ ./mvnw spring-boot:run
+./mvnw spring-boot:run
 ```
 
 ## Usage
@@ -92,7 +92,7 @@ $ ./mvnw spring-boot:run
 To check if application is running:
 
 ```bash
-$ curl http://localhost:8080
+curl http://localhost:8080
 ```
 
 You will receive the response "Hello".
@@ -102,7 +102,7 @@ You will receive the response "Hello".
 To generate a list of GitHub user's stars by default:
 
 ```bash
-$ curl http://localhost:8080/{username}
+curl http://localhost:8080/{username}
 ```
 
 Remember to replace the `{username}` placeholder with the actual username.
@@ -112,7 +112,7 @@ Remember to replace the `{username}` placeholder with the actual username.
 To choose whether or not to show all the programming languages:
 
 ```bash
-$ curl http://localhost:8080/{username}/{getAllLanguages}
+curl http://localhost:8080/{username}/{getAllLanguages}
 ```
 
 You can replace the `{getAllLanguages}` placeholder with `true` or `false`.
@@ -120,14 +120,55 @@ You can replace the `{getAllLanguages}` placeholder with `true` or `false`.
 For example, if you want the list to show all the programming languages of the starred repositories:
 
 ```bash
-$ curl http://localhost:8080/{username}/true
+curl http://localhost:8080/{username}/true
 ```
 
 Or you can let the list to show only the major language of the starred repositories:
 
 ```bash
-$ curl http://localhost:8080/{username}/false
+curl http://localhost:8080/{username}/false
 ```
+
+## Defining Custom Sorting Order
+
+The sort order is defined in [RepoServiceImpl.java](./src/main/java/com/github/learndifferent/githubstars/service/impl/RepoServiceImpl.java):
+
+```java
+@Override
+public LinkedHashMap<String, List<Repo>> getSortedRepoMap(List<Repo> repos) {
+    log.info("Sort Starred Repo by Language, Stars and Forks.");
+    return repos.stream()
+            .sorted(Comparator
+                    .comparing(Repo::getWatchers, Comparator.reverseOrder())
+                    .thenComparing(Repo::getForks, Comparator.reverseOrder()))
+            .peek(repo -> {
+                if (repo.getLanguage() == null) {
+                    repo.setLanguage("Others");
+                }
+            })
+            .collect(Collectors.groupingBy(
+                    Repo::getLanguage,
+                    LinkedHashMap::new,
+                    Collectors.toList()))
+            .entrySet().stream()
+            .sorted(Comparator.comparing(entry -> {
+                        if (entry.getKey().equalsIgnoreCase("others")) {
+                            return -1;
+                        }
+                        return entry.getValue().size();
+                    }, Comparator.reverseOrder())
+            )
+            .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (a, b) -> {
+                        throw new ServiceException("Key Conflicts");
+                    },
+                    LinkedHashMap::new));
+}
+```
+
+You can change the code to define a custom sort order.
 
 ## My GitHub Stars
 
@@ -136,3 +177,4 @@ Checkout [My GitHub Stars](https://github.com/LearnDifferent/my-github-stars)
 ## License
 
 Released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt).
+
