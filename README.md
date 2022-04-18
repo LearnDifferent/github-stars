@@ -65,9 +65,6 @@ Build a JAR file and run it from the command line:
 # Build a JAR file
 ./mvnw package
 
-# Move the JAR file to current directory
-mv target/*.jar .
-
 # Run the JAR file
 java -jar target/*.jar
 ```
@@ -80,11 +77,11 @@ Or you can run the application from Maven directly using the Spring Boot Maven p
 
 ## Usage
 
-| Method | Path                          | Description                                                  |
-| ------ | ----------------------------- | ------------------------------------------------------------ |
-| GET    | /                             | Return "Hello".                                              |
-| GET    | /{username}                   | Generate a list of GitHub user's stars, which will only show the major programming language of the starred repositories. |
-| GET    | /{username}/{getAllLanguages} | Generate a list of GitHub user's stars, which will show all the programming languages of the starred repositories. |
+| Method | Path               | Description                                                  |
+| ------ | ------------------ | ------------------------------------------------------------ |
+| GET    | /                  | Return "Hello".                                              |
+| GET    | /{username}        | Generate a list of GitHub user's stars, which will only show the major programming language of the starred repositories. |
+| GET    | /{username}/{mode} | Generate a list of GitHub user's stars according to the mode. |
 
 > The list of GitHub user's stars will be saved to a Markdown file in current working directory.
 
@@ -110,24 +107,27 @@ Remember to replace the `{username}` placeholder with the actual username.
 
 ---
 
-To choose whether or not to show all the programming languages:
+To choose whether to show all the programming languages:
 
 ```bash
-curl http://localhost:8080/{username}/{getAllLanguages}
+curl http://localhost:8080/{username}/{mode}
 ```
 
-You can replace the `{getAllLanguages}` placeholder with `true` or `false`.
+You can replace the `{mode}` placeholder with `0` or `1` :
+
+- 0: Get all languages
+- 1: Get only the main language
 
 For example, if you want the list to show all the programming languages of the starred repositories:
 
 ```bash
-curl http://localhost:8080/{username}/true
+curl http://localhost:8080/{username}/0
 ```
 
 Or you can let the list to show only the major language of the starred repositories:
 
 ```bash
-curl http://localhost:8080/{username}/false
+curl http://localhost:8080/{username}/1
 ```
 
 ## Defining Custom Sorting Order
@@ -178,4 +178,3 @@ Checkout [My GitHub Stars](https://github.com/LearnDifferent/my-github-stars)
 ## License
 
 Released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt).
-
