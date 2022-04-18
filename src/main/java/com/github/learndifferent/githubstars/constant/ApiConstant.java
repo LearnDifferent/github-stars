@@ -1,4 +1,4 @@
-package com.github.learndifferent.githubstars.Const;
+package com.github.learndifferent.githubstars.constant;
 
 public class ApiConstant {
     private ApiConstant() {
