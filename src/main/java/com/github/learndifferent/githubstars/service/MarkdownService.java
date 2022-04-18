@@ -1,14 +1,28 @@
 package com.github.learndifferent.githubstars.service;
 
-import com.github.learndifferent.githubstars.entity.Repo;
+import com.github.learndifferent.githubstars.enums.GetMode;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-
+/**
+ * Markdown Service
+ *
+ * @author zhou
+ * @date 2022/4/18
+ */
 public interface MarkdownService {
-    void generateMarkdown(String username, LinkedHashMap<String, List<Repo>> repoMap);
 
-    void generateMarkdown(String username, boolean getAllLanguages);
+    /**
+     * Generate a list of GitHub user's stars and save it to a Markdown file
+     *
+     * @param username username of the user whose data is being requested
+     * @param mode     Get all languages if {@link GetMode#GET_ALL_LANGUAGES}.
+     *                 Get only the main language if {@link GetMode#GET_ONLY_MAIN_LANGUAGE}.
+     */
+    void generateMarkdown(String username, GetMode mode);
 
+    /**
+     * Generate a list of GitHub user's stars and save it to a Markdown file
+     *
+     * @param username username of the user whose data is being requested
+     */
     void generateMarkdown(String username);
 }
